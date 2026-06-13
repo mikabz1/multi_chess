@@ -1,1 +1,1 @@
-# multi_chess
+# multi_ches
