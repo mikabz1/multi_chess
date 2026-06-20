@@ -81,6 +81,8 @@ def resign(game_id):
     game = Game.query.get_or_404(game_id)
     try:
         updated = resign_game(game, user_id)
+        from app.extensions import socketio
+        socketio.emit("game_over", {"game": updated, "reason": "resign"}, to=f"game:{game_id}")
         return {"game": updated}
     except ChessServiceError as exc:
         return {"error": str(exc)}, 400
