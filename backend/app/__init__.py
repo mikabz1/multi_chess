@@ -36,7 +36,7 @@ def create_app():
     app.register_blueprint(games_bp, url_prefix="/api/games")
     app.register_blueprint(users_bp, url_prefix="/api/users")
 
-    from app.sockets import game_socket, chat_socket  # noqa: F401
+    from app.sockets import game_socket, chat_socket, matchmaking_socket  # noqa: F401
 
     @app.get("/api/health")
     def health():
