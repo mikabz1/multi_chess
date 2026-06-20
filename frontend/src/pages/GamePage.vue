@@ -108,12 +108,13 @@ function connectSocket() {
     game.value = payload.game
     const result = payload.game.result
     const color = yourColor.value
+    const resign = payload.reason === 'resign'
     const won = (result === 'white_win' && color === 'white') || (result === 'black_win' && color === 'black')
     const lost = (result === 'white_win' && color === 'black') || (result === 'black_win' && color === 'white')
     gameOverModal.value = won
-      ? { type: 'win',  emoji: '🏆', title: 'You Won!',  subtitle: 'Brilliant play — your opponent had no answer.' }
+      ? { type: 'win',  emoji: '🏆', title: 'You Won!',  subtitle: resign ? 'Your opponent resigned. Well played!' : 'Brilliant play — your opponent had no answer.' }
       : lost
-      ? { type: 'lose', emoji: '😔', title: 'You Lost',  subtitle: 'Better luck next time. Study the board and come back stronger.' }
+      ? { type: 'lose', emoji: '😔', title: 'You Lost',  subtitle: resign ? 'You resigned. Better luck next time!' : 'Better luck next time. Study the board and come back stronger.' }
       : { type: 'draw', emoji: '🤝', title: 'It\'s a Draw!', subtitle: 'An even battle — neither side could break through.' }
   })
   socket.value.on('invalid_move', (payload) => { error.value = payload.error })
@@ -132,8 +133,7 @@ function sendChat(message) {
 
 async function resign() {
   try {
-    const { data } = await http.post(`/games/${game.value.id}/resign`)
-    game.value = data.game
+    await http.post(`/games/${game.value.id}/resign`)
   } catch (err) {
     error.value = err.response?.data?.error || 'Failed to resign'
   }
