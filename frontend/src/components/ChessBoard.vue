@@ -116,9 +116,10 @@ watch(() => props.fen, () => { selected.value = null })
 
 function onSquareClick(square) {
   const piece = chess.value.get(square)
+  const myColor = props.yourColor === 'white' ? 'w' : 'b'
 
   if (!selected.value) {
-    if (!piece) return
+    if (!piece || piece.color !== myColor) return
     selected.value = square
     return
   }
@@ -130,7 +131,7 @@ function onSquareClick(square) {
 
   // Clicking another piece of the same color changes the selected piece.
   const selectedPiece = chess.value.get(selected.value)
-  if (piece && selectedPiece && piece.color === selectedPiece.color) {
+  if (piece && selectedPiece && piece.color === selectedPiece.color && piece.color === myColor) {
     selected.value = square
     return
   }
