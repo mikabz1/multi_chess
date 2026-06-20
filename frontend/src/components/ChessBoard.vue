@@ -22,6 +22,7 @@
                 last: lastMoveSquares.includes(square.name),
                 legal: legalTargetSquares.includes(square.name),
                 capture: legalCaptureSquares.includes(square.name),
+                'in-check': square.name === kingInCheckSquare,
               },
             ]"
             @click="onSquareClick(square.name)"
@@ -37,7 +38,7 @@
           </button>
         </div>
 
-        <div class="file-labels file-labels-bottom">
+      <div class="file-labels file-labels-bottom">
           <span v-for="file in displayFiles" :key="`bottom-${file}`">{{ file }}</span>
         </div>
       </div>
@@ -48,6 +49,9 @@
     </div>
 
     <p class="hint">Click a piece to see legal moves. Promotion defaults to queen.</p>
+    <Transition name="check-banner">
+      <div v-if="isInCheck" class="check-banner">⚠️ Check!</div>
+    </Transition>
   </div>
 </template>
 
@@ -112,6 +116,16 @@ const legalMoves = computed(() => {
 const legalTargetSquares = computed(() => legalMoves.value.map((move) => move.to))
 const legalCaptureSquares = computed(() => legalMoves.value.filter((move) => move.captured).map((move) => move.to))
 
+const isInCheck = computed(() => chess.value.inCheck())
+const kingInCheckSquare = computed(() => {
+  if (!isInCheck.value) return null
+  const turn = chess.value.turn() // 'w' or 'b'
+  for (const sq of chess.value.board().flat()) {
+    if (sq?.type === 'k' && sq.color === turn) return sq.square
+  }
+  return null
+})
+
 watch(() => props.fen, () => { selected.value = null })
 
 function onSquareClick(square) {
@@ -150,3 +164,31 @@ function onSquareClick(square) {
   selected.value = null
 }
 </script>
+
+<style scoped>
+.square.in-check {
+  box-shadow: inset 0 0 0 999px rgba(239, 68, 68, 0.45);
+  animation: pulse-check 1s ease-in-out infinite;
+}
+
+@keyframes pulse-check {
+  0%, 100% { box-shadow: inset 0 0 0 999px rgba(239, 68, 68, 0.45); }
+  50%       { box-shadow: inset 0 0 0 999px rgba(239, 68, 68, 0.7); }
+}
+
+.check-banner {
+  margin-top: 10px;
+  text-align: center;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.45);
+  border-radius: 10px;
+  padding: 6px 16px;
+  color: #fca5a5;
+  font-weight: 800;
+  font-size: 0.95rem;
+  letter-spacing: 0.03em;
+}
+
+.check-banner-enter-active, .check-banner-leave-active { transition: opacity 0.3s, transform 0.3s; }
+.check-banner-enter-from, .check-banner-leave-to { opacity: 0; transform: translateY(-6px); }
+</style>
