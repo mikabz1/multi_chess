@@ -86,7 +86,7 @@ const squares = computed(() => {
       const piece = chess.value.get(name)
       result.push({
         name,
-        color: (rank + fileIndex) % 2 === 0 ? 'dark' : 'light',
+        color: (rank + fileIndex) % 2 !== 0 ? 'dark' : 'light',
         piece: piece ? pieceMap[piece.type] : '',
         pieceColor: piece?.color || null,
       })
